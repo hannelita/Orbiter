@@ -73,8 +73,9 @@ static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
 
 - (NSURLRequest *)requestForRegistrationOfDeviceToken:(id)deviceToken
                                           withPayload:(NSDictionary *)payload
-{    
-    return [self.HTTPClient requestWithMethod:@"PUT" path:[NSString stringWithFormat:@"devices/%@", AFNormalizedDeviceTokenStringWithDeviceToken(deviceToken)] parameters:payload];
+{
+    NSURLRequest *req = [self.HTTPClient requestWithMethod:@"PUT" path:[NSString stringWithFormat:@"device/%@", AFNormalizedDeviceTokenStringWithDeviceToken(deviceToken)] parameters:payload];
+    return req;
 }
 
 - (NSURLRequest *)requestForUnregistrationOfDeviceToken:(id)deviceToken {
@@ -111,7 +112,10 @@ static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
         [mutablePayload setValue:alias forKey:@"alias"];
     }
     
-    [self registerDeviceToken:deviceToken withPayload:mutablePayload success:success failure:failure];
+    NSMutableDictionary *initialMutablePayload = [NSMutableDictionary dictionary];
+    [initialMutablePayload setValue:mutablePayload forKey:@"device"];
+    
+    [self registerDeviceToken:deviceToken withPayload:initialMutablePayload success:success failure:failure];
 }
 
 - (void)registerDeviceToken:(NSString *)deviceToken
