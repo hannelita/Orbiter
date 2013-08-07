@@ -23,6 +23,7 @@
 #import "Orbiter.h"
 #import "AFHTTPClient.h"
 #import "AFJSONRequestOperation.h"
+#import "AFOAuth1Client.h"
 
 static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
     return [[[[deviceToken description] uppercaseString] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]] stringByReplacingOccurrencesOfString:@" " withString:@""];
@@ -60,21 +61,29 @@ static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
     }
     
     self.HTTPClient = [[AFHTTPClient alloc] initWithBaseURL:baseURL];
-    [self.HTTPClient setDefaultHeader:@"Accept" value:@"application/json"];
-    [self.HTTPClient setParameterEncoding:AFJSONParameterEncoding];
-    [self.HTTPClient registerHTTPOperationClass:[AFJSONRequestOperation class]];
-
-    if (credential) {
-        [self.HTTPClient setAuthorizationHeaderWithUsername:credential.user password:credential.password];
-    }
+    [self setupClientWithCredential:credential];
     
     return self;
 }
 
+- (id)initWithBaseURL:(NSURL *)baseURL
+           credential:(NSURLCredential *)credential
+                  key:(NSString *)clientID
+               secret:(NSString *)secret
+{
+    self.HTTPClient = [[AFOAuth1Client alloc] initWithBaseURL:baseURL key:clientID secret:secret];
+    [self setupClientWithCredential:credential];
+    
+    return self;
+
+    
+}
+
 - (NSURLRequest *)requestForRegistrationOfDeviceToken:(id)deviceToken
                                           withPayload:(NSDictionary *)payload
-{    
-    return [self.HTTPClient requestWithMethod:@"PUT" path:[NSString stringWithFormat:@"devices/%@", AFNormalizedDeviceTokenStringWithDeviceToken(deviceToken)] parameters:payload];
+{
+    NSURLRequest *req = [self.HTTPClient requestWithMethod:@"PUT" path:[NSString stringWithFormat:@"device/%@", AFNormalizedDeviceTokenStringWithDeviceToken(deviceToken)] parameters:payload];
+    return req;
 }
 
 - (NSURLRequest *)requestForUnregistrationOfDeviceToken:(id)deviceToken {
@@ -111,7 +120,10 @@ static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
         [mutablePayload setValue:alias forKey:@"alias"];
     }
     
-    [self registerDeviceToken:deviceToken withPayload:mutablePayload success:success failure:failure];
+    NSMutableDictionary *initialMutablePayload = [NSMutableDictionary dictionary];
+    [initialMutablePayload setValue:mutablePayload forKey:@"device"];
+    
+    [self registerDeviceToken:deviceToken withPayload:initialMutablePayload success:success failure:failure];
 }
 
 - (void)registerDeviceToken:(NSString *)deviceToken
@@ -147,6 +159,20 @@ static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
         }
     }];
     [self.HTTPClient enqueueHTTPRequestOperation:operation];
+}
+
+- (void) setupClientWithCredential:(NSURLCredential *)credential
+{
+    
+    [self.HTTPClient setDefaultHeader:@"Accept" value:@"application/json"];
+    [self.HTTPClient setParameterEncoding:AFJSONParameterEncoding];
+    [self.HTTPClient registerHTTPOperationClass:[AFJSONRequestOperation class]];
+    
+    if (credential) {
+        [self.HTTPClient setAuthorizationHeaderWithUsername:credential.user password:credential.password];
+    }
+
+    
 }
 
 @end

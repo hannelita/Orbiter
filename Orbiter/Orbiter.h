@@ -30,6 +30,11 @@
 - (id)initWithBaseURL:(NSURL *)baseURL
            credential:(NSURLCredential *)credential;
 
+- (id)initWithBaseURL:(NSURL *)baseURL
+           credential:(NSURLCredential *)credential
+                  key:(NSString *)clientID
+               secret:(NSString *)secret;
+
 /**
  
  */
