@@ -9,4 +9,5 @@ Pod::Spec.new do |s|
   s.source_files = 'Orbiter'
   s.requires_arc = true
   s.dependency 'AFNetworking', '>= 0.9'
+  s.dependency 'AFOAuth1Client','0.2.1'
 end
