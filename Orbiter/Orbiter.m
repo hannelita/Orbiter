@@ -87,7 +87,7 @@ static NSString * AFNormalizedDeviceTokenStringWithDeviceToken(id deviceToken) {
 }
 
 - (NSURLRequest *)requestForUnregistrationOfDeviceToken:(id)deviceToken {
-    return [self.HTTPClient requestWithMethod:@"DELETE" path:[NSString stringWithFormat:@"devices/%@", AFNormalizedDeviceTokenStringWithDeviceToken(deviceToken)] parameters:nil];
+    return [self.HTTPClient requestWithMethod:@"DELETE" path:[NSString stringWithFormat:@"device/%@", AFNormalizedDeviceTokenStringWithDeviceToken(deviceToken)] parameters:nil];
 }
 
 #pragma mark -
